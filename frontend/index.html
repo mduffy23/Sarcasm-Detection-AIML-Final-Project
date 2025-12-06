@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head> 
+    <meta charset="UTF-8">
+    <title>Sarcasm Prediction</title>
+
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background: #f5f6fa;
+            color: #2f3640;
+            max-width: 450px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #273c75;
+        }
+
+        div {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid hsl(228, 8%, 87%);
+            font-size: 15px;
+        }
+
+        button {
+            width: 50%;
+            padding: 12px;
+            background: #487eb0;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: 600;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        button:hover {
+            background: #40739e;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            color: #44bd32;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Sarcasm Prediction</h1>
+    <div>
+        <label for="Statement">Statement</label>
+        <input id="Statement" name="Statement" type="text"/>
+    </div>
+
+    <button onclick="predict()">Predict</button>
+    <div id="result"></div>
+
+    <script>
+        async function predict() {
+            const statement = document.getElementById("Statement").value
+
+            const response = await fetch(`${window.location.origin}/predict`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(statement)
+            });
+
+            const result = await response.json();
+
+            let is_sarcastic = result.is_sarcastic ? "Sarcastic" : "Not Sarcastic";
+            let sarcastic_probability = `${(result.sarcasm_probability * 100).toFixed(2)}%`;
+
+            document.getElementById("result").textContent = `${is_sarcastic}! (Probability: ${sarcastic_probability})`;
+        }
+    </script>
+</body>
+</html>
