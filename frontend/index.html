@@ -204,6 +204,10 @@
             vertical-align: middle;
             margin-right: 8px;
         }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
@@ -217,14 +221,14 @@
                 id="s1" 
                 name="Statement"
                 rows="3"
-                placeholder="Type a statement"
+                placeholder="Type something that may or may not be sarcastic..."
                 oninput="autoResize(this)"
                 onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); predict(); }"
             ></textarea>
         </div>
 
         <button onclick="predict()" id="predictBtn">
-            Predict
+            Analyze Statement
         </button>
         
         <div id="result"></div>
@@ -241,6 +245,14 @@
             const resultDiv = document.getElementById("result");
             const btn = document.getElementById("predictBtn");
 
+            if (!statement) {
+                resultDiv.className = '';
+                resultDiv.innerHTML = 'Please enter a statement';
+                resultDiv.classList.add('show', 'not-sarcastic');
+                setTimeout(() => resultDiv.classList.remove('show'), 2000);
+                return;
+            }
+
             btn.disabled = true;
             btn.innerHTML = '<span class="loading"></span>Analyzing...';
             resultDiv.classList.remove('show');
@@ -256,12 +268,14 @@
 
                 const isSarcastic = result.sarcastic;
                 const probability = (result.sarcastic_probability * 100).toFixed(1);
-                                
+                
+                resultDiv.className = isSarcastic ? 'sarcastic' : 'not-sarcastic';
+                
                 const label = isSarcastic ? 'Sarcastic' : 'Not Sarcastic';
                 
                 resultDiv.innerHTML = `
                     <strong>${label}</strong>
-                    <span class="probability">Sarcasm Probability: ${probability}%</span>
+                    <span class="probability">Confidence: ${probability}%</span>
                 `;
                 
                 setTimeout(() => resultDiv.classList.add('show'), 50);
@@ -273,6 +287,7 @@
                 console.error('Error:', error);
             } finally {
                 btn.disabled = false;
+                btn.innerHTML = 'Analyze Statement';
             }
         }
     </script>
