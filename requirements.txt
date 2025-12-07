@@ -4,4 +4,3 @@ pydantic
 torch
 numpy
 transformers
-re

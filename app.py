@@ -5,26 +5,45 @@ from pydantic import BaseModel
 import numpy as np
 import torch
 import re
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import RobertaTokenizerFast
+from RoBERTaWithLexical import RobertaWithLexical
+from collections import OrderedDict
+import json
 
 # Define input and output
 class SarcasmInput(BaseModel):
-    Statement: str
+    statement: str
 
 class PredictionOutput(BaseModel):
-    Sarcastic: bool
+    sarcastic: bool
     sarcastic_probability: float
 
 # Load in fine tuned RoBerta
-model_path = ''
+with open('config.json') as f:
+  cfg = json.load(f)
 
-tokenizer = AutoTokenizer.from_pretrained(model_path)
-model = AutoModelForSequenceClassification.from_pretrained(model_path)
-model.eval()
-device = "cuda" if torch.cuda.is_available() else "cpu" # Would be nice to have cuda
+model = RobertaWithLexical(
+    model_name=cfg["model_name"],
+    feature_dim=cfg["feature_dim"],
+    num_labels=cfg["num_labels"]
+)
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+state_dict = torch.load('roberta_lexical_weights.pt', map_location=device)
+
+# Remove DDP prefix (_orig_mod.)
+new_state_dict = OrderedDict()
+for k, v in state_dict.items():
+    new_key = k.replace("_orig_mod.", "")
+    new_state_dict[new_key] = v
+
+# Now load into your model
+model.load_state_dict(new_state_dict, strict=False)
 model.to(device)
+model.eval()
 
 # Define function for lexical feature generation on user input
+tokenizer = RobertaTokenizerFast.from_pretrained('RoBERTaTrained')
 intensifiers = {"literally", "absolutely", "totally", "completely", "seriously"}
 irony = {"yeah right", "sure", "as if", "i bet", "no way", "oh great", "oh yeah"}
 sarcasm_punctuation = {"!","!!","!?","?!"}
@@ -53,7 +72,7 @@ def predict_sarcasm(model, text, tokenizer=tokenizer, device=device):
     encodings = tokenizer(text, truncation=True, padding="max_length", max_length=128, return_tensors="pt")
     
     # Lexical features
-    lexical_features = torch.tensor([lexical_features_one(t) for t in text], dtype=torch.float32)
+    lexical_features = torch.tensor([lexical_features_one(text)], dtype=torch.float32)
     
     # Move to device
     input_ids = encodings["input_ids"].to(device)
@@ -76,14 +95,13 @@ app = FastAPI()
 ## Define prediction endpoint
 @app.post("/predict", response_model = PredictionOutput)
 def predict(data: SarcasmInput):
-    statement = SarcasmInput.Statement
+    statement = data.statement
 
-    prediction = predict_sarcasm(statement)
+    prediction = predict_sarcasm(model, statement)
     
     is_sarcastic = prediction['predicted_label'] == 1
     sarcasm_probability = prediction['probabilities'][1]
-
-    return PredictionOutput(is_sarcastic, sarcasm_probability)
+    return PredictionOutput(sarcastic=is_sarcastic, sarcastic_probability=sarcasm_probability)
 
 # Mount Frontend
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
