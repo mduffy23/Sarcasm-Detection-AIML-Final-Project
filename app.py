@@ -1,4 +1,5 @@
 # Packages
+from huggingface_hub import hf_hub_download
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -18,8 +19,12 @@ class PredictionOutput(BaseModel):
     sarcastic: bool
     sarcastic_probability: float
 
+config_path = hf_hub_download(
+    repo_id="mduffy-23/RoBertaWithLexicalFeatures-Sarcasm", filename="config.json"
+)
+
 # Load in fine tuned RoBerta
-with open('config.json') as f:
+with open(config_path) as f:
   cfg = json.load(f)
 
 model = RobertaWithLexical(
@@ -28,8 +33,13 @@ model = RobertaWithLexical(
     num_labels=cfg["num_labels"]
 )
 
+weights_path = hf_hub_download(
+    repo_id="mduffy-23/RoBertaWithLexicalFeatures-Sarcasm", filename="roberta_lexical_weights.pt"
+)
+
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-state_dict = torch.load('roberta_lexical_weights.pt', map_location=device)
+state_dict = torch.load(weights_path, map_location=device)
 
 # Remove DDP prefix (_orig_mod.)
 new_state_dict = OrderedDict()
