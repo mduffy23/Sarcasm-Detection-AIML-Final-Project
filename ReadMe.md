@@ -15,3 +15,10 @@ This project leverages a dataset from https://www.kaggle.com/datasets/danofer/sa
 - RoBERTa is a huggingface transformer model, but to utilize the lexical features, a torch model was defined to leverage the pretrained RoBERTa model and then add the lexical features to the model. The model was then hyperparameter tuned with the optuna library, which offered the best learning rate, dropout, and weight decay. The regular transformer training arguments and trainer were used to fine tune the model to predict sarcasm!
 
 - This model was saved for usage in a small we application. FastAPI was used to generate a simple endpoint to hit the model from an HTML page. Hoping to deploy this on render soon, but the model may be too large for the basic version.
+
+# External Resources
+- Deployed Application: https://huggingface.co/spaces/mduffy-23/sarcasm-detection
+
+- Model Repo: https://huggingface.co/mduffy-23/RoBertaWithLexicalFeatures-Sarcasm
+
+- Slides deck for project: https://docs.google.com/presentation/d/1IfV45Ue9LjGM3RReL6iFR1dRjt7vOaRMjJT1EO4iQWE/edit?usp=sharing
