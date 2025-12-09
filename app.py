@@ -53,7 +53,7 @@ model.to(device)
 model.eval()
 
 # Define function for lexical feature generation on user input
-tokenizer = RobertaTokenizerFast.from_pretrained('RoBERTaTrained')
+tokenizer = RobertaTokenizerFast.from_pretrained(cfg["model_name"])
 intensifiers = {"literally", "absolutely", "totally", "completely", "seriously"}
 irony = {"yeah right", "sure", "as if", "i bet", "no way", "oh great", "oh yeah"}
 sarcasm_punctuation = {"!","!!","!?","?!"}
