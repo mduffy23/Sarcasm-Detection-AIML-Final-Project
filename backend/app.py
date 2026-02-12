@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import re
 from transformers import RobertaTokenizerFast
-from RoBERTaWithLexical import RobertaWithLexical
+from backend.RoBERTaWithLexical import RobertaWithLexical
 from collections import OrderedDict
 import json
 
@@ -114,4 +114,4 @@ def predict(data: SarcasmInput):
     return PredictionOutput(sarcastic=is_sarcastic, sarcastic_probability=sarcasm_probability)
 
 # Mount Frontend
-app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
+app.mount("/", StaticFiles(directory="../frontend", html=True), name="frontend")
