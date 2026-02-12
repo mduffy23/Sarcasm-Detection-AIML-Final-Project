@@ -6,6 +6,14 @@ This project leverages a dataset from https://www.kaggle.com/datasets/danofer/sa
 
 - RoBERTa is a large contextual language transformer model that solves a lot of the shortcomings of TF-IDF. RoBERTa has the same architecture as BERT, but was trained on ten times more data, which makes it generally better than BERT. RoBERTa has a few other training improvements like dynamic masking (versus static masking), larger batches, and more training iterations, which also lead to it performing better than the original BERT model. Because of all these training methods, RoBERTa is a great model to fine-tune for sarcasm detection, as it can pick up on subtle context changes based on sentence structure, punctuation, and contradictions, because it is trained on such a large corpus of text. 
 
+# Project Structure
+
+- `notebook` contains all modeling and data exploration. Best way to understand the model.
+
+- `backend` loads in trained model and creates endpoint for users to get predictions on their sentence. Also shows the config and model files for the model.
+
+- `frontend` contains the webpage that allows users to access the model.
+
 # Methods
 
 - For TF-IDF, the comments were lemmatized (transforms words that mean the same thing but are in different parts of speech to be the same for the tokenizer) to help with understanding similar words. RoBERTa, on the other hand, does not need the words lemmatized since it uses a subword tokenizer and contextual embeddings, allowing RoBERTa to understand relationships between word forms based on shared subwords, without explicit lemmatization. Similar words like run, runs, ran, and running will have similar vectors when they appear in similar contexts. Since RoBERTa was trained on raw text, it should actually perform better on the raw statements; it understands things like tense and tone. 
